@@ -11,11 +11,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- 緑 x モダン デザインテーマ定義 --- */
+        /* --- デザインテーマ定義 --- */
         :root {
-            --primary-color: #4CAF50; --secondary-color: #388E3C; --accent-color: #C8E6C9; --bg-color: #F1F8E9; --sidebar-bg: #FFFFFF;
-            --cell-bg: #FFFFFF; --text-color: #212529; --text-muted-color: #555; --border-color: #DDE7D1; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07); --border-radius: 0.5rem; --sidebar-width: 320px; --favorite-color: #FFC107;
+            --primary-color: #4CAF50;
+            --secondary-color: #388E3C;
+            --accent-color: #C8E6C9;
+            --bg-color: #f8f9fa; 
+            --sidebar-bg: #FFFFFF;
+            --cell-bg: #FFFFFF;
+            --text-color: #212529;
+            --text-muted-color: #6c757d;
+            --border-color: #dee2e6; /* 基本の枠線を黒系の色に */
+            --border-color-black: #212529; /* お気に入り用の黒い枠線 */
+            --favorite-color: #FFC107;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --border-radius: 0.5rem;
+            --sidebar-width: 320px;
         }
         html { font-size: 14px; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); height: 100vh; overflow: hidden; font-size: 1rem; -webkit-font-smoothing: antialiased; }
@@ -26,43 +38,72 @@
         #main-content-wrapper { width: 100%; height: 100%; transition: padding-left 0.3s ease-in-out; }
         body.sidebar-opened #main-content-wrapper { padding-left: var(--sidebar-width); }
 
+        /* --- ヘッダー統一設定 --- */
+        #sidebar-header, #memo-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 74px; /* 高さを確実に合わせる */
+            display: flex;
+            align-items: center;
+        }
+        #sidebar-header h1, #memo-header h2 {
+            font-size: 1.5rem; /* 文字サイズを統一 */
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin: 0;
+        }
+        #sidebar-header h1 .fa-leaf { color: var(--primary-color); }
+
         /* --- サイドバー内部 --- */
-        #sidebar-header, #memo-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); min-height: 74px; display: flex; align-items: center; }
-        #sidebar-header h1, #memo-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--secondary-color); margin: 0; }
-        #room-list { overflow-y: auto; }
-        .room-item { padding: 1rem 1.5rem; cursor: grab; border-left: 4px solid transparent; transition: all 0.2s ease; border-bottom: 1px solid #f0f0f0; }
-        .room-item:hover { background-color: var(--bg-color); }
-        .room-item.active { background-color: var(--accent-color); border-left-color: var(--primary-color); }
+        #room-list { overflow-y: auto; padding: 0.5rem; }
+        .room-item {
+            padding: 1rem 1.5rem;
+            cursor: grab;
+            border: 1px solid transparent; /* ガタつき防止の透明ボーダー */
+            border-bottom: 1px solid #f0f0f0 !important;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .room-item:hover { background-color: #f1f3f5; }
+        .room-item.active { background-color: var(--accent-color); }
         .room-item .room-title { font-weight: 600; font-size: 1rem; color: #343a40; }
         .room-item .room-preview { font-size: 0.875rem; color: var(--text-muted-color); }
         .delete-room-btn { color: #adb5bd; transition: all 0.2s ease; }
         #add-room-btn { border-radius: var(--border-radius); font-weight: 600; font-size: 1rem; }
         
-        /* ★★ お気に入り & ドラッグ＆ドロップ用スタイル ★★ */
-        .favorite-btn { color: #ccc; cursor: pointer; transition: color 0.2s ease; }
+        /* お気に入り & ドラッグ＆ドロップ用スタイル */
+        .favorite-btn { color: #ccc; cursor: pointer; transition: all 0.2s ease; }
         .favorite-btn.favorited { color: var(--favorite-color); }
         .favorite-btn:hover { transform: scale(1.2); }
-        .sortable-ghost { background-color: var(--accent-color); opacity: 0.5; border-radius: var(--border-radius); }
+        .room-item.is-favorite {
+            border: 1px solid var(--border-color-black) !important;
+            box-shadow: var(--shadow-sm);
+        }
+        .room-item.is-favorite.active {
+            background-color: var(--accent-color);
+            border-color: var(--border-color-black) !important;
+        }
+        .sortable-ghost { background-color: var(--accent-color); opacity: 0.5; }
         .sortable-drag { cursor: grabbing; }
 
         /* --- メインコンテンツ --- */
-        #main-content { background: linear-gradient(to bottom, #ffffff, var(--bg-color) 300px); }
+        #main-content { background-color: var(--bg-color) }
         #memo-header { background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 5; }
         #memo-header h2 { cursor: pointer; }
         #memo-header h2 .fa-pen { font-size: 0.7em; opacity: 0; transition: opacity 0.2s ease; }
         #memo-header h2:hover .fa-pen { opacity: 1; }
 
         /* --- セル --- */
-        .cell { background-color: var(--cell-bg); border: 1px solid #e0e0e0; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
+        .cell { background-color: var(--cell-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
         .cell:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15); }
-        .cell-toolbar { background-color: #fafafa; border-bottom: 1px solid #eee; }
+        .cell-toolbar { background-color: #f8f9fa; border-bottom: 1px solid var(--border-color); }
         .cell-char-count { cursor: pointer; font-size: 0.875rem; }
         .cell-char-count:hover { color: var(--primary-color) !important; text-decoration: underline; }
         .cell-textarea { background-color: transparent; min-height: 90px; font-size: 1rem; line-height: 1.7; }
         .cell-textarea:focus { box-shadow: none !important; }
 
         /* --- その他 --- */
-        .dropdown-menu { min-width: 260px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); }
         .hidden { display: none !important; }
         .modal-content, .btn, .form-control { border-radius: var(--border-radius); }
         .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
@@ -73,10 +114,8 @@
 <body class="sidebar-opened">
     <div id="sidebar" class="d-flex flex-column h-100">
         <div id="sidebar-header" class="justify-content-between">
-            <h1 title="俺の最強メモアプリ" class="mb-0 text-truncate"><i class="fas fa-leaf mr-2" style="color: var(--primary-color);"></i>俺の最強メモアプリ</h1>
-            <div class="dropdown">
-                <button class="btn btn-sm btn-light" title="設定" data-toggle="modal" data-target="#settingsModal"><i class="fas fa-cog"></i></button>
-            </div>
+            <h1 title="俺の最強メモアプリ" class="mb-0 text-truncate"><i class="fas fa-leaf mr-2"></i>俺の最強メモアプリ</h1>
+            <button class="btn btn-sm btn-light" title="設定" data-toggle="modal" data-target="#settingsModal"><i class="fas fa-cog"></i></button>
         </div>
         <div id="room-list" class="flex-grow-1 list-group list-group-flush"></div>
         <div class="p-3 border-top" style="background-color: #fafafa;">
@@ -88,7 +127,7 @@
         <main id="main-content" class="h-100 overflow-auto">
             <div id="welcome-message" class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
                 <button id="sidebar-toggle-btn-welcome" class="btn btn-light position-absolute" style="top: 1.25rem; left: 1.25rem;" title="サイドバーを開閉"><i class="fas fa-bars"></i></button>
-                <i class="fas fa-seedling fa-4x mb-4" style="color: var(--accent-color);"></i>
+                <i class="fas fa-leaf fa-4x mb-4" style="color: #e0e0e0;"></i>
                 <h3 class="font-weight-bold" style="color: #a0a0a0;">ようこそ</h3>
                 <p class="text-muted">左のリストから部屋を選択するか、新しい部屋を作成してください。</p>
             </div>
@@ -112,119 +151,43 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const ui = { body: document.body, sidebarToggleBtn: document.getElementById('sidebar-toggle-btn'), sidebarToggleBtnWelcome: document.getElementById('sidebar-toggle-btn-welcome'), roomList: document.getElementById('room-list'), memoContainer: document.getElementById('memo-container'), welcomeMessage: document.getElementById('welcome-message'), roomTitleDisplay: document.getElementById('room-title-display'), cellsContainer: document.getElementById('cells-container'), addCellBtn: document.getElementById('add-cell-btn'), fontSizeSlider: document.getElementById('fontSizeSlider'), roomModal: $('#roomModal'), confirmModal: $('#confirmModal'), charCountDetailModal: $('#charCountDetailModal'), detailTotal: document.getElementById('detail-total'), detailNoSpace: document.getElementById('detail-no-space'), detailWords: document.getElementById('detail-words'), detailLines: document.getElementById('detail-lines') };
-        let rooms = []; let activeRoomId = null; const STORAGE_KEY = 'ore_no_saikyo_memo_app_green_v7';
-
-        // --- データ管理 ---
-        const loadRooms = () => {
-            let loadedRooms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            // ★★ データ構造のマイグレーション（順序とお気に入りプロパティの追加）★★
-            rooms = loadedRooms.map(room => ({
-                ...room,
-                isFavorite: room.isFavorite || false,
-                order: room.order || room.id // 昔のデータには順序がないためIDで代用
-            }));
-            saveRooms();
-        };
+        let rooms = []; let activeRoomId = null; const STORAGE_KEY = 'ore_no_saikyo_memo_app_final_v1';
+        const loadRooms = () => { let loadedRooms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); rooms = loadedRooms.map(room => ({ ...room, isFavorite: room.isFavorite || false, order: room.order || room.id })); saveRooms(); };
         const saveRooms = () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(rooms)); };
         const applyFontSize = (size) => { document.documentElement.style.fontSize = `${size}px`; localStorage.setItem('fontSize', size); };
         const loadFontSize = () => { const savedSize = localStorage.getItem('fontSize') || '14'; applyFontSize(savedSize); ui.fontSizeSlider.value = savedSize; };
-
-        // --- UIレンダリング ---
         const renderRoomList = () => {
             ui.roomList.innerHTML = '';
-            // ★★ お気に入りと順序でソート ★★
-            rooms.sort((a, b) => (b.isFavorite - a.isFavorite) || (b.order - a.order))
-                 .forEach(room => {
-                    const li = document.createElement('div');
-                    li.className = `room-item list-group-item list-group-item-action ${room.id === activeRoomId ? 'active' : ''}`;
-                    li.dataset.id = room.id; // ドラッグ＆ドロップで使うためIDを付与
-                    
-                    const previewText = room.cells.map(c => c.content).join(' ').trim();
-                    const preview = previewText.substring(0, 30) + (previewText.length > 30 ? '...' : '');
-                    const starClass = room.isFavorite ? 'fas favorited' : 'far';
-
-                    li.innerHTML = `
-                        <div class="d-flex align-items-center">
-                            <span class="favorite-btn mr-3" title="お気に入り"><i class="${starClass} fa-star"></i></span>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="room-title text-truncate">${room.title}</div>
-                                <div class="room-preview text-truncate">${preview || 'まだメモがありません'}</div>
-                            </div>
-                            <button class="delete-room-btn btn btn-sm btn-link text-decoration-none p-0 ml-2" title="部屋を削除"><i class="fas fa-trash-alt"></i></button>
-                        </div>`;
-
-                    li.addEventListener('click', () => selectRoom(room.id));
-                    li.querySelector('.delete-room-btn').addEventListener('click', e => { e.stopPropagation(); deleteRoom(room.id, room.title); });
-                    // ★★ お気に入りボタンのイベントリスナー ★★
-                    li.querySelector('.favorite-btn').addEventListener('click', e => { e.stopPropagation(); toggleFavorite(room.id); });
-                    
-                    ui.roomList.appendChild(li);
-                });
+            rooms.sort((a, b) => (b.isFavorite - a.isFavorite) || (b.order - a.order)).forEach(room => {
+                const li = document.createElement('div');
+                li.className = `room-item list-group-item list-group-item-action ${room.id === activeRoomId ? 'active' : ''} ${room.isFavorite ? 'is-favorite' : ''}`;
+                li.dataset.id = room.id;
+                const previewText = room.cells.map(c => c.content).join(' ').trim();
+                const preview = previewText.substring(0, 30) + (previewText.length > 30 ? '...' : '');
+                const starClass = room.isFavorite ? 'fas favorited' : 'far';
+                li.innerHTML = `<div class="d-flex align-items-center"><span class="favorite-btn mr-3" title="お気に入り"><i class="${starClass} fa-star"></i></span><div class="flex-grow-1 overflow-hidden"><div class="room-title text-truncate">${room.title}</div><div class="room-preview text-truncate">${preview || 'まだメモがありません'}</div></div><button class="delete-room-btn btn btn-sm btn-link text-decoration-none p-0 ml-2" title="部屋を削除"><i class="fas fa-trash-alt"></i></button></div>`;
+                li.addEventListener('click', () => selectRoom(room.id));
+                li.querySelector('.delete-room-btn').addEventListener('click', e => { e.stopPropagation(); deleteRoom(room.id, room.title); });
+                li.querySelector('.favorite-btn').addEventListener('click', e => { e.stopPropagation(); toggleFavorite(room.id); });
+                ui.roomList.appendChild(li);
+            });
         };
         const renderMemoArea = () => { if (!activeRoomId) { ui.memoContainer.classList.add('hidden'); ui.welcomeMessage.classList.remove('hidden'); return; } const room = rooms.find(r => r.id === activeRoomId); if (!room) { activeRoomId = null; return renderMemoArea(); } ui.memoContainer.classList.remove('hidden'); ui.welcomeMessage.classList.add('hidden'); ui.roomTitleDisplay.innerHTML = `${room.title} <i class="fas fa-pen ml-2 text-muted"></i>`; ui.cellsContainer.innerHTML = ''; room.cells.forEach(cell => ui.cellsContainer.appendChild(createCellElement(cell))); };
         const createCellElement = (cell) => { const cellDiv = document.createElement('div'); cellDiv.className = 'cell mb-3'; cellDiv.innerHTML = `<div class="cell-toolbar p-2 d-flex justify-content-end align-items-center"><span class="cell-char-count text-muted small mr-auto pl-2" title="詳細を表示">0文字</span><button class="delete-cell-btn btn btn-sm btn-link text-muted" title="セルを削除"><i class="fas fa-times"></i></button></div><textarea class="cell-textarea form-control border-0 bg-transparent" placeholder="..."></textarea>`; const textarea = cellDiv.querySelector('textarea'); const charCountEl = cellDiv.querySelector('.cell-char-count'); textarea.value = cell.content; const updateCount = () => charCountEl.textContent = `${textarea.value.length}文字`; const adjustHeight = () => { textarea.style.height = 'auto'; textarea.style.height = `${textarea.scrollHeight}px`; }; textarea.addEventListener('input', () => { handleCellInput(cell.id, textarea.value); adjustHeight(); updateCount(); }); cellDiv.querySelector('.delete-cell-btn').addEventListener('click', () => deleteCell(cell.id)); charCountEl.addEventListener('click', () => showDetailedCharCount(textarea.value)); setTimeout(() => { adjustHeight(); updateCount(); }, 0); return cellDiv; };
         const renderAll = () => { saveRooms(); renderRoomList(); renderMemoArea(); };
-
-        // --- イベントハンドラ ---
         const selectRoom = (roomId) => { activeRoomId = roomId; renderAll(); };
-        const addRoom = (title) => {
-            const newRoom = { id: Date.now(), title, cells: [{ id: Date.now() + 1, content: '' }], isFavorite: false, order: Date.now() };
-            rooms.push(newRoom); // unshiftではなくpushして、ソートに任せる
-            selectRoom(newRoom.id);
-        };
+        const addRoom = (title) => { const newRoom = { id: Date.now(), title, cells: [{ id: Date.now() + 1, content: '' }], isFavorite: false, order: Date.now() }; rooms.push(newRoom); selectRoom(newRoom.id); };
         const deleteRoom = (roomId, roomTitle) => { confirmAction(`「${roomTitle}」を本当に削除しますか？`, () => { rooms = rooms.filter(room => room.id !== roomId); if (activeRoomId === roomId) activeRoomId = null; renderAll(); }); };
         const handleCellInput = (cellId, content) => { const room = rooms.find(r => r.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); if (cell) cell.content = content; saveRooms(); renderRoomList(); };
         const deleteCell = (cellId) => { confirmAction('このセルを削除しますか？', () => { const room = rooms.find(r => r.id === activeRoomId); if (room) { room.cells = room.cells.filter(c => c.id !== cellId); renderAll(); } }); };
         const showDetailedCharCount = (text) => { ui.detailTotal.textContent = `${text.length} 文字`; ui.detailNoSpace.textContent = `${text.replace(/\s/g, '').length} 文字`; const words = text.trim().split(/\s+/).filter(Boolean); ui.detailWords.textContent = `${text.trim() === '' ? 0 : words.length} 語`; ui.detailLines.textContent = `${text.split('\n').length} 行`; ui.charCountDetailModal.modal('show'); };
-        
-        // ★★ お気に入り切り替え機能 ★★
-        const toggleFavorite = (roomId) => {
-            const room = rooms.find(r => r.id === roomId);
-            if (room) {
-                room.isFavorite = !room.isFavorite;
-                renderAll();
-            }
-        };
-
-        // --- モーダル制御 ---
+        const toggleFavorite = (roomId) => { const room = rooms.find(r => r.id === roomId); if (room) { room.isFavorite = !room.isFavorite; renderAll(); } };
         $('#roomModal').on('show.bs.modal', function (event) { const button = $(event.relatedTarget); const action = button.data('action'); const modal = $(this); const input = modal.find('#roomModalInput'); if (action === 'add') { modal.find('.modal-title').text('新しい部屋を作成'); const now = new Date(); const defaultTitle = `メモ ${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`; input.val(defaultTitle); $(modal.find('#roomModalSave')).off('click').on('click', () => { const title = input.val().trim(); if (title) { addRoom(title); modal.modal('hide'); } }); } });
         $('#roomModal').on('shown.bs.modal', function () { $(this).find('#roomModalInput').select(); });
         ui.roomTitleDisplay.addEventListener('click', () => { const room = rooms.find(r => r.id === activeRoomId); if (!room) return; const modal = ui.roomModal; modal.find('.modal-title').text('タイトルを編集'); const input = modal.find('#roomModalInput'); input.val(room.title); $(modal.find('#roomModalSave')).off('click').on('click', () => { const newTitle = input.val().trim(); if (newTitle) { room.title = newTitle; renderAll(); modal.modal('hide'); } }); modal.modal('show'); });
         const confirmAction = (text, callback) => { $('#confirmModalText').text(text); ui.confirmModal.modal('show'); $('#confirmModalDelete').off('click').on('click', () => { callback(); ui.confirmModal.modal('hide'); }); };
-        
-        // ★★ ドラッグ＆ドロップ初期化 ★★
-        const initializeSortable = () => {
-            new Sortable(ui.roomList, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: (evt) => {
-                    const roomOrder = Array.from(ui.roomList.children).map(el => parseInt(el.dataset.id));
-                    const roomMap = new Map(rooms.map(room => [room.id, room]));
-                    const totalRooms = rooms.length;
-
-                    // 新しい順序をorderプロパティに反映
-                    roomOrder.forEach((id, index) => {
-                        const room = roomMap.get(id);
-                        if (room) {
-                            room.order = totalRooms - index;
-                        }
-                    });
-                    renderAll();
-                }
-            });
-        };
-
-        // --- 初期化 ---
-        const initialize = () => {
-            loadRooms(); loadFontSize(); renderAll();
-            const toggleSidebar = () => { ui.body.classList.toggle('sidebar-closed'); ui.body.classList.toggle('sidebar-opened'); };
-            ui.sidebarToggleBtn.addEventListener('click', toggleSidebar);
-            ui.sidebarToggleBtnWelcome.addEventListener('click', toggleSidebar);
-            ui.addCellBtn.addEventListener('click', () => { const room = rooms.find(r => r.id === activeRoomId); if(room) { const newCell = { id: Date.now(), content: '' }; room.cells.push(newCell); renderAll(); const newCellEl = document.querySelector(`.cell[data-cell-id='${newCell.id}']`); if(newCellEl) newCellEl.querySelector('textarea').focus(); } });
-            ui.fontSizeSlider.addEventListener('input', (e) => applyFontSize(e.target.value));
-            initializeSortable();
-        };
+        const initializeSortable = () => { new Sortable(ui.roomList, { animation: 150, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag', onEnd: (evt) => { const roomOrder = Array.from(ui.roomList.children).map(el => parseInt(el.dataset.id)); const roomMap = new Map(rooms.map(room => [room.id, room])); const totalRooms = rooms.length; roomOrder.forEach((id, index) => { const room = roomMap.get(id); if (room) { room.order = totalRooms - index; } }); renderAll(); } }); };
+        const initialize = () => { loadRooms(); loadFontSize(); renderAll(); const toggleSidebar = () => { ui.body.classList.toggle('sidebar-closed'); ui.body.classList.toggle('sidebar-opened'); }; ui.sidebarToggleBtn.addEventListener('click', toggleSidebar); ui.sidebarToggleBtnWelcome.addEventListener('click', toggleSidebar); ui.addCellBtn.addEventListener('click', () => { const room = rooms.find(r => r.id === activeRoomId); if(room) { const newCell = { id: Date.now(), content: '' }; room.cells.push(newCell); renderAll(); const newCellEl = document.querySelector(`.cell[data-cell-id='${newCell.id}']`); if(newCellEl) newCellEl.querySelector('textarea').focus(); } }); ui.fontSizeSlider.addEventListener('input', (e) => applyFontSize(e.target.value)); initializeSortable(); };
         initialize();
     });
     </script>
