@@ -722,12 +722,54 @@
             const findNodeAndParent = (nodes, nodeId, parent = null) => { for (let i = 0; i < nodes.length; i++) { if (nodes[i].id === nodeId) return { node: nodes[i], parent, index: i }; if (nodes[i].children) { const found = findNodeAndParent(nodes[i].children, nodeId, nodes[i]); if (found) return found; } } return null; };
             const addTreeNode = (cellId, parentId, afterId) => { const room = rooms.find(r => r.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); if (!cell) return; const newNode = { id: Date.now(), title: '新規アイテム', details: '', children: [] }; if (parentId) { const { node: parent } = findNodeAndParent(cell.treeData, parentId); if (parent) { if (!afterId) { parent.children.unshift(newNode); } else { const siblingIndex = parent.children.findIndex(n => n.id === afterId); parent.children.splice(siblingIndex + 1, 0, newNode); } } } else { const siblingIndex = cell.treeData.findIndex(n => n.id === afterId); cell.treeData.splice(siblingIndex + 1, 0, newNode); } renderAll(); };
             const deleteTreeNode = (cellId, nodeId) => { const room = rooms.find(r => r.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); if (!cell) return; const { parent, index } = findNodeAndParent(cell.treeData, nodeId); if (parent) { parent.children.splice(index, 1); } else { cell.treeData.splice(index, 1); } renderAll(); };
-            const insertTree = (cellId) => { const room = rooms.find(r => r.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); if (cell && cell.type !== 'tree') { cell.type = 'tree'; cell.treeData = [{ id: Date.now(), title: 'ルートアイテム', details: '', children: [] }]; cell.content = ''; renderAll(); } };
+            const insertTree = (cellId) => {
+                const room = rooms.find(r => r.id === activeRoomId);
+                const cell = room?.cells.find(c => c.id === cellId);
+                if (!cell || cell.type === 'tree') return; // セルがないか、既に階層メモなら何もしない
+
+                // 階層メモ化する処理
+                const proceed = () => {
+                    cell.type = 'tree';
+                    cell.treeData = [{ id: Date.now(), title: 'ルートアイテム', details: '', children: [] }];
+                    cell.content = ''; // テキスト内容をクリア
+                    renderAll();
+                };
+
+                // セルにテキストが存在する場合、確認ダイアログを表示
+                if (cell.type === 'text' && cell.content.trim() !== '') {
+                    confirmAction('セル内のテキストは削除されます。階層メモを挿入してもよろしいですか？', proceed);
+                } else {
+                    // テキストがない場合はそのまま実行
+                    proceed();
+                }
+            };
             const openTreeNodeDetail = (cellId, nodeId) => { const room = rooms.find(r => r.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); const { node } = findNodeAndParent(cell.treeData, nodeId); if (node) { ui.treeNodeDetailTitle.textContent = `「${node.title}」の詳細メモ`; ui.treeNodeDetailTextarea.value = node.details; ui.treeNodeDetailModal.modal('show'); ui.treeNodeDetailSave.onclick = () => { node.details = ui.treeNodeDetailTextarea.value; saveRooms(); ui.treeNodeDetailModal.modal('hide'); }; } };
 
             // ★★ テーブルの関数 ★★
             const handleTableCellInput = (cellId, r, c, content) => { const room = rooms.find(room => room.id === activeRoomId); const cell = room?.cells.find(cell => cell.id === cellId); if (cell && cell.tableData) { cell.tableData[r][c] = content; saveRooms(); } };
-            const insertTable = (cellId) => { const room = rooms.find(room => room.id === activeRoomId); const cell = room?.cells.find(c => c.id === cellId); if (cell && cell.type !== 'table') { cell.type = 'table'; const headers = ['ヘッダー1', 'ヘッダー2']; cell.tableData = [headers, ['データ1', 'データ2']]; cell.tableColWidths = Array(headers.length).fill(150); cell.content = ''; renderAll(); } };
+            const insertTable = (cellId) => {
+                const room = rooms.find(room => room.id === activeRoomId);
+                const cell = room?.cells.find(c => c.id === cellId);
+                if (!cell || cell.type === 'table') return; // セルがないか、既にテーブルなら何もしない
+
+                // テーブル化する処理
+                const proceed = () => {
+                    cell.type = 'table';
+                    const headers = ['ヘッダー1', 'ヘッダー2'];
+                    cell.tableData = [headers, ['データ1', 'データ2']];
+                    cell.tableColWidths = Array(headers.length).fill(150);
+                    cell.content = ''; // テキスト内容をクリア
+                    renderAll();
+                };
+
+                // セルにテキストが存在する場合、確認ダイアログを表示
+                if (cell.type === 'text' && cell.content.trim() !== '') {
+                    confirmAction('セル内のテキストは削除されます。テーブルを挿入してもよろしいですか？', proceed);
+                } else {
+                    // テキストがない場合はそのまま実行
+                    proceed();
+                }
+            };
             const addTableRow = (cellId) => {
                 const room = rooms.find(room => room.id === activeRoomId);
                 const cell = room?.cells.find(c => c.id === cellId);
